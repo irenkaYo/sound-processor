@@ -24,7 +24,15 @@ public static class FilterProducers
     
     public static IFilter NormalizeFilterCreator(FilterDescriptor descriptor)
     {
-        double peak = double.Parse(descriptor.Parameters[0]);
+        double peak;
+        if (descriptor.Parameters.Count > 0)
+            peak = double.Parse(descriptor.Parameters[0]);
+        else
+            return new NormalizeFilter();
+        
+        if (peak < 0 || peak > 1)
+            throw new ArgumentException("Normalize filter must be from 0 to 1");
+        
         return new NormalizeFilter(peak);
     }
     
