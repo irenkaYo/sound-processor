@@ -19,6 +19,10 @@ public static class FilterProducers
     public static IFilter LowpassFilterCreator(FilterDescriptor descriptor)
     {
         int windowSize = int.Parse(descriptor.Parameters[0]);
+        
+        if (windowSize < 1 || windowSize % 2 == 0)
+            throw new ArgumentException("Lowpass filter wrong input");
+        
         return new LowpassFilter(windowSize);
     }
     
