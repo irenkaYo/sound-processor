@@ -1,6 +1,7 @@
 using SoundProcessor.CommandLine;
 using SoundProcessor.Filters;
 using SoundProcessor.Filters.Effects;
+using SoundProcessor.Filters.Generators;
 
 namespace SoundProcessor.Converters;
 
@@ -60,5 +61,50 @@ public static class FilterProducers
             throw new ArgumentException("Timestretch filter cannot be negative");
         
         return new TimestretchFilter(factor);
+    }
+
+    public static IFilter GeneratorFilterCreator(FilterDescriptor descriptor)
+    {
+        string type = descriptor.Parameters[0];
+        
+        IFilter generator = null;
+        switch (type)
+        {
+            case "sin":
+            {
+                generator = SinGenFilterCreator(descriptor);
+                break;
+            }
+            case "am":
+            {
+                AMSinGenFilterCreator(descriptor);
+                break;
+            }
+            case "fm":
+            {
+                FMSinGenFilterCreator(descriptor);
+                break;
+            }
+            default:
+            {
+                throw new ArgumentException("Filter type not supported");
+            }
+        }
+
+        return generator;
+    }
+    
+    
+    
+
+    public static IFilter SinGenFilterCreator(FilterDescriptor descriptor)
+    {
+        double frequencyHz = double.Parse(descriptor.Parameters[1]);
+        double durationMs = double.Parse(descriptor.Parameters[2]);
+        
+        if (frequencyHz < 0 || durationMs < 0)
+            throw new ArgumentException("SinGen filter cannot be negative");
+        
+        return new SinGenFilter(frequencyHz, durationMs);
     }
 }
