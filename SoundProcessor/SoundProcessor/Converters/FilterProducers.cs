@@ -51,6 +51,10 @@ public static class FilterProducers
     public static IFilter TimestretchFilterCreator(FilterDescriptor descriptor)
     {
         double factor = double.Parse(descriptor.Parameters[0]);
+        
+        if (factor < 0)
+            throw new ArgumentException("Timestretch filter cannot be negative");
+        
         return new TimestretchFilter(factor);
     }
 }
