@@ -41,6 +41,10 @@ public static class FilterProducers
         string unit = descriptor.Parameters[0];
         double start = double.Parse(descriptor.Parameters[1]);
         double end = double.Parse(descriptor.Parameters[2]);
+        
+        if (start < 0 || end < start)
+            throw new ArgumentException("Silence filter wrong input");
+        
         return new SilenceFilter(unit, start, end);
     }
 
