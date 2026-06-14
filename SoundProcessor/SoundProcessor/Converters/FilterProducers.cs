@@ -9,7 +9,10 @@ public static class FilterProducers
 {
     public static IFilter AmplFilterCreator(FilterDescriptor descriptor)
     {
-        double factor = double.Parse(descriptor.Parameters[0]);
+        if (descriptor.Parameters.Count != 1)
+            throw new ArgumentException("Ampl filter requires 1 parameter");
+        
+        double factor = ParseDouble(descriptor.Parameters[0], nameof(factor));
         
         if (factor < 0)
             throw new ArgumentException("Ampl filter cannot be negative");
@@ -19,7 +22,11 @@ public static class FilterProducers
     
     public static IFilter LowpassFilterCreator(FilterDescriptor descriptor)
     {
-        int windowSize = int.Parse(descriptor.Parameters[0]);
+        if (descriptor.Parameters.Count != 1)
+            throw new ArgumentException("Lowpass filter requires 1 parameter");
+
+        if (!int.TryParse(descriptor.Parameters[0], out int windowSize))
+            throw new ArgumentException("Window size must be an integer");
         
         if (windowSize < 1 || windowSize % 2 == 0)
             throw new ArgumentException("Lowpass filter wrong input");
@@ -29,33 +36,46 @@ public static class FilterProducers
     
     public static IFilter NormalizeFilterCreator(FilterDescriptor descriptor)
     {
-        double peak;
-        if (descriptor.Parameters.Count > 0)
-            peak = double.Parse(descriptor.Parameters[0]);
-        else
+        if (descriptor.Parameters.Count > 1)
+            throw new ArgumentException("Normalize filter accepts 0 or 1 parameter");
+
+        if (descriptor.Parameters.Count == 0)
             return new NormalizeFilter();
-        
+
+        double peak = ParseDouble(descriptor.Parameters[0], nameof(peak));
+
         if (peak < 0 || peak > 1)
-            throw new ArgumentException("Normalize filter must be from 0 to 1");
-        
+            throw new ArgumentException("Peak must be in range [0, 1]");
+
         return new NormalizeFilter(peak);
     }
     
     public static IFilter SilenceFilterCreator(FilterDescriptor descriptor)
     {
+        if (descriptor.Parameters.Count != 3)
+            throw new ArgumentException("Silence filter requires 3 parameters");
+
         string unit = descriptor.Parameters[0];
-        double start = double.Parse(descriptor.Parameters[1]);
-        double end = double.Parse(descriptor.Parameters[2]);
-        
+
+        if (unit != "ms" && unit != "sec")
+            throw new ArgumentException("Unknown unit");
+
+        double start = ParseDouble(descriptor.Parameters[1],nameof(start));
+
+        double end =  ParseDouble(descriptor.Parameters[2], nameof(end));
+
         if (start < 0 || end < start)
-            throw new ArgumentException("Silence filter wrong input");
-        
+            throw new ArgumentException("Invalid range");
+
         return new SilenceFilter(unit, start, end);
     }
 
     public static IFilter TimestretchFilterCreator(FilterDescriptor descriptor)
     {
-        double factor = double.Parse(descriptor.Parameters[0]);
+        if (descriptor.Parameters.Count != 1)
+            throw new ArgumentException("Timestretch filter requires 1 parameter");
+
+        double factor = ParseDouble(descriptor.Parameters[0], nameof(factor));
         
         if (factor < 0)
             throw new ArgumentException("Timestretch filter cannot be negative");
@@ -67,7 +87,7 @@ public static class FilterProducers
     {
         string type = descriptor.Parameters[0];
         
-        IFilter generator = null;
+        IFilter generator;
         switch (type)
         {
             case "sin":
@@ -87,7 +107,7 @@ public static class FilterProducers
             }
             default:
             {
-                throw new ArgumentException("Filter type not supported");
+                throw new ArgumentException("Filter generator type not supported");
             }
         }
 
@@ -96,8 +116,8 @@ public static class FilterProducers
     
     private static IFilter SinGenFilterCreator(FilterDescriptor descriptor)
     {
-        double frequencyHz = double.Parse(descriptor.Parameters[1]);
-        double durationMs = double.Parse(descriptor.Parameters[2]);
+        double frequencyHz = ParseDouble(descriptor.Parameters[1], nameof(frequencyHz));
+        double durationMs = ParseDouble(descriptor.Parameters[2], nameof(durationMs));
         
         if (frequencyHz < 0 || durationMs < 0)
             throw new ArgumentException("SinGen filter cannot be negative");
@@ -107,11 +127,11 @@ public static class FilterProducers
 
     private static IFilter AMSinGenFilterCreator(FilterDescriptor descriptor)
     {
-        double amplitude = double.Parse(descriptor.Parameters[1]);
-        double carrierHz = double.Parse(descriptor.Parameters[2]);
-        double modulationHz = double.Parse(descriptor.Parameters[3]);
-        double depth = double.Parse(descriptor.Parameters[4]);
-        double durationMs = double.Parse(descriptor.Parameters[5]);
+        double amplitude = ParseDouble(descriptor.Parameters[1], nameof(amplitude));
+        double carrierHz = ParseDouble(descriptor.Parameters[2], nameof(carrierHz));
+        double modulationHz = ParseDouble(descriptor.Parameters[3], nameof(modulationHz));
+        double depth = ParseDouble(descriptor.Parameters[4], nameof(depth));
+        double durationMs = ParseDouble(descriptor.Parameters[5], nameof(durationMs));
         
         if (amplitude < 0 || amplitude > 1 ||
             carrierHz < 0||
@@ -125,11 +145,11 @@ public static class FilterProducers
 
     private static IFilter FMSinGenFilterCreator(FilterDescriptor descriptor)
     {
-        double amplitude = double.Parse(descriptor.Parameters[1]);
-        double carrierHz = double.Parse(descriptor.Parameters[2]);
-        double modulationHz = double.Parse(descriptor.Parameters[3]);
-        double deviationHz = double.Parse(descriptor.Parameters[4]);
-        double durationMs = double.Parse(descriptor.Parameters[5]);
+        double amplitude = ParseDouble(descriptor.Parameters[1], nameof(amplitude));
+        double carrierHz = ParseDouble(descriptor.Parameters[2], nameof(carrierHz));
+        double modulationHz = ParseDouble(descriptor.Parameters[3], nameof(modulationHz));
+        double deviationHz = ParseDouble(descriptor.Parameters[4], nameof(deviationHz));
+        double durationMs = ParseDouble(descriptor.Parameters[5], nameof(durationMs));
         
         if (amplitude < 0 || amplitude > 1 ||
             carrierHz < 0||
@@ -139,5 +159,13 @@ public static class FilterProducers
             throw new ArgumentException("FM SinGen filter wrong input");
         
         return new FMSinGenFilter(amplitude, carrierHz, modulationHz, deviationHz, durationMs);
+    }
+    
+    private static double ParseDouble(string value, string name)
+    {
+        if (!double.TryParse(value, out double result))
+            throw new ArgumentException($"{name} must be a number");
+
+        return result;
     }
 }
