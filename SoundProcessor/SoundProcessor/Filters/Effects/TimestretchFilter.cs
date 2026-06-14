@@ -12,8 +12,11 @@ public class TimestretchFilter : IFilter
         Factor = factor;
     }
 
-    public State Apply(Waveform sound)
+    public State Apply(Waveform? sound)
     {
+        if (sound == null)
+            return State.Error;
+        
         int newSize = (int)Math.Round(sound.Samples.Count * Factor);
         
         double pos;

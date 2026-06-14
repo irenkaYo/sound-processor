@@ -20,8 +20,11 @@ public class FMSinGenFilter : AbstractGeneratorFilter
         DurationMs = durationMs;
     }
 
-    public override State Apply(Waveform sound)
+    public override State Apply(Waveform? sound)
     {
+        if (sound == null)
+            return State.Error;
+        
         int duration = (int)Math.Round(DurationMs * sound.SampleRate / 1000);
 
         for (int i = 0; i < duration; i++)

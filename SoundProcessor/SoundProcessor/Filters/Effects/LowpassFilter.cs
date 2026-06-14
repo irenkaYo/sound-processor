@@ -12,8 +12,11 @@ public class LowpassFilter : IFilter
         WindowSize = windowSize;
     }
 
-    public State Apply(Waveform sound)
+    public State Apply(Waveform? sound)
     {
+        if (sound == null)
+            return State.Error;
+        
         List<short> newSamples = new List<short>();
 
         int sum = 0;

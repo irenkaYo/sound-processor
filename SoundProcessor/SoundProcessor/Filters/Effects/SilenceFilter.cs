@@ -16,8 +16,11 @@ public class SilenceFilter : IFilter
         End = end;
     }
     
-    public State Apply(Waveform sound)
+    public State Apply(Waveform? sound)
     {
+        if (sound == null)
+            return State.Error;
+        
         double start = Start;
         double end = End;
         

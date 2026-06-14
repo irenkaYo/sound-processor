@@ -20,10 +20,13 @@ public class AMSinGenFilter : AbstractGeneratorFilter
         DurationMs = durationMs;
     }
 
-    public override State Apply(Waveform sound)
+    public override State Apply(Waveform? sound)
     {
+        if (sound == null)
+            return State.Error;
+        
         int duration = (int)Math.Round(DurationMs * sound.SampleRate / 1000);
-        sound.Samples.Clear();
+
         for (int i = 0; i < duration; i++)
         {
             double t = (double)i / sound.SampleRate;

@@ -17,10 +17,10 @@ public class NormalizeFilter : IFilter
         Peak = 1;
     }
 
-    public State Apply(Waveform sound)
+    public State Apply(Waveform? sound)
     {
-        if (sound.Samples == null)
-            throw new ArgumentNullException(nameof(sound));
+        if (sound == null)
+            return State.Error;
         
         int currentPeak = sound.Samples
             .Select(s => Math.Abs((int)s))

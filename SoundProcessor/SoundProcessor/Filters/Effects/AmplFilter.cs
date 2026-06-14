@@ -12,10 +12,10 @@ public class AmplFilter : IFilter
         Factor = factor;
     }
     
-    public State Apply(Waveform sound)
+    public State Apply(Waveform? sound)
     {
-        if (sound.Samples == null)
-            throw new ArgumentNullException(nameof(sound));
+        if (sound == null)
+            return State.Error;
         
         for (int i = 0; i < sound.Samples.Count; i++)
         {
