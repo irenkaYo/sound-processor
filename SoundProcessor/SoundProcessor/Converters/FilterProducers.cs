@@ -94,10 +94,7 @@ public static class FilterProducers
         return generator;
     }
     
-    
-    
-
-    public static IFilter SinGenFilterCreator(FilterDescriptor descriptor)
+    private static IFilter SinGenFilterCreator(FilterDescriptor descriptor)
     {
         double frequencyHz = double.Parse(descriptor.Parameters[1]);
         double durationMs = double.Parse(descriptor.Parameters[2]);
@@ -106,5 +103,23 @@ public static class FilterProducers
             throw new ArgumentException("SinGen filter cannot be negative");
         
         return new SinGenFilter(frequencyHz, durationMs);
+    }
+
+    private static IFilter AMSinGenFilterCreator(FilterDescriptor descriptor)
+    {
+        double amplitude = double.Parse(descriptor.Parameters[1]);
+        double carrierHz = double.Parse(descriptor.Parameters[2]);
+        double modulationHz = double.Parse(descriptor.Parameters[3]);
+        double depth = double.Parse(descriptor.Parameters[4]);
+        double durationMs = double.Parse(descriptor.Parameters[5]);
+        
+        if (amplitude < 0 || amplitude > 1 ||
+            carrierHz < 0||
+            modulationHz < 0 ||
+            depth < 0 || depth > 1 ||
+            durationMs < 0)
+            throw new ArgumentException("AM SinGen filter wrong input");
+        
+        
     }
 }
