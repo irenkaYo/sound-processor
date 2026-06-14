@@ -77,12 +77,12 @@ public static class FilterProducers
             }
             case "am":
             {
-                AMSinGenFilterCreator(descriptor);
+                generator = AMSinGenFilterCreator(descriptor);
                 break;
             }
             case "fm":
             {
-                FMSinGenFilterCreator(descriptor);
+                generator = FMSinGenFilterCreator(descriptor);
                 break;
             }
             default:
@@ -120,6 +120,24 @@ public static class FilterProducers
             durationMs < 0)
             throw new ArgumentException("AM SinGen filter wrong input");
         
+        return new AMSinGenFilter(amplitude, carrierHz, modulationHz, depth, durationMs);
+    }
+
+    private static IFilter FMSinGenFilterCreator(FilterDescriptor descriptor)
+    {
+        double amplitude = double.Parse(descriptor.Parameters[1]);
+        double carrierHz = double.Parse(descriptor.Parameters[2]);
+        double modulationHz = double.Parse(descriptor.Parameters[3]);
+        double deviationHz = double.Parse(descriptor.Parameters[4]);
+        double durationMs = double.Parse(descriptor.Parameters[5]);
         
+        if (amplitude < 0 || amplitude > 1 ||
+            carrierHz < 0||
+            modulationHz <= 0 ||
+            deviationHz < 0 ||
+            durationMs < 0)
+            throw new ArgumentException("FM SinGen filter wrong input");
+        
+        return new FMSinGenFilter(amplitude, carrierHz, modulationHz, deviationHz, durationMs);
     }
 }
