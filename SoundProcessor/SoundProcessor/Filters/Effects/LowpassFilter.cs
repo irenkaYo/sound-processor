@@ -16,41 +16,45 @@ public class LowpassFilter : IFilter
     {
         if (sound == null)
             return State.Error;
+
+        if (sound.Samples.Count == 0)
+            return State.Ok;
+
+        List<short> newSamples = new List<short>(sound.Samples.Count);
+
+        int halfWindow = WindowSize / 2;
+
+        long sum = 0;
         
-        List<short> newSamples = new List<short>();
-
-        int sum = 0;
-
-        int elementsCount = WindowSize / 2;
-        for (int i = 0; i < sound.Samples.Count; i++)
+        for (int j = -halfWindow; j <= halfWindow; j++)
         {
-            if (i == 0)
-            {
-                int k = elementsCount;
-                while (k != 0)
-                {
-                    sum += sound.Samples[k];
-                    k--;
-                }
-                sum += sound.Samples[i] * (elementsCount + 1);
-            }
-            else if (i - elementsCount - 1 < 0)
-            {
-                sum = sum - sound.Samples[0] + sound.Samples[i + elementsCount];
-            }
-            else if (i + elementsCount >= sound.Samples.Count)
-            {
-                sum = sum - sound.Samples[i - elementsCount - 1] + sound.Samples[sound.Samples.Count - 1];
-            }
-            else
-            {
-                sum = sum - sound.Samples[i - elementsCount - 1] + sound.Samples[i + elementsCount];
-            }
-            
-            short avg = (short)(sum / WindowSize);
-            newSamples.Add(avg);
+            sum += GetSample(sound.Samples, j);
         }
 
+        for (int i = 0; i < sound.Samples.Count; i++)
+        {
+            newSamples.Add((short)(sum / WindowSize));
+
+            if (i == sound.Samples.Count - 1)
+                break;
+
+            sum -= GetSample(sound.Samples, i - halfWindow);
+            sum += GetSample(sound.Samples, i + halfWindow + 1);
+        }
+
+        sound.Samples = newSamples;
+
         return State.Ok;
+    }
+    
+    private short GetSample(List<short> samples, int index)
+    {
+        if (index < 0)
+            return samples[0];
+
+        if (index >= samples.Count)
+            return samples[^1];
+
+        return samples[index];
     }
 }
