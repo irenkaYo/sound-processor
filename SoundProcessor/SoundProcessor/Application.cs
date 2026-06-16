@@ -30,8 +30,15 @@ public class Application
         ArgsParser parser = new ArgsParser(args);
 
         ParseResult parseResult = parser.ParseArguments();
+        
+        if (parseResult == ParseResult.NoArgs)
+        {
+            Console.WriteLine("Usage: SoundProcessor [-i input.wav] -o output.wav [-f filter params...]");
+            return;
+        }
+
         if (parseResult != ParseResult.Ok)
-            throw new Exception("Parsing error: " + parseResult);
+            throw new Exception("Argument error: " + parseResult);
         
         Pipeline pipeline = _cmdConverter.CreatePipeline(parser.Filters);
 
@@ -48,6 +55,7 @@ public class Application
             throw new Exception($"Pipeline failed: {state}");
         }
         
-        WavWriter.WriteFile(parser.OutputFileName, sound);
+        if (parser.OutputFileName != null)
+            WavWriter.WriteFile(parser.OutputFileName, sound);
     }
 }
