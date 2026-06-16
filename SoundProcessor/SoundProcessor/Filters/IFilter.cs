@@ -5,5 +5,5 @@ namespace SoundProcessor.Filters;
 
 public interface IFilter
 {
-    public State Apply(Waveform sound);
+    public State Apply(Waveform? sound);
 }
