@@ -1,6 +1,6 @@
 namespace SoundProcessor.Audio.Headers;
 
-public class DataHeader
+public struct DataHeader
 {
     public uint ChunkId;
     public uint ChunkSize;

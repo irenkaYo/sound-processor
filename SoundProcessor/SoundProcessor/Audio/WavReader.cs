@@ -5,6 +5,9 @@ namespace SoundProcessor.Audio;
 public static class WavReader
 {
     private const uint WAVE = 0x45564157;
+    private const uint RIFF = 0x46464952;
+    private const uint FMT  = 0x20746D66;
+    private const uint DATA = 0x61746164;
     
     public static Waveform ReadFile(string fileName)
     {
@@ -16,6 +19,9 @@ public static class WavReader
             Size = reader.ReadUInt32(),
             WaveId = reader.ReadUInt32()
         };
+        
+        if (riff.Sign != RIFF)
+            throw new InvalidDataException("File is not a RIFF file");
         
         if (riff.WaveId != WAVE)
         {
@@ -34,11 +40,17 @@ public static class WavReader
             BitsPerSample = reader.ReadUInt16()
         };
         
+        if (fmt.ChunkId != FMT)
+            throw new InvalidDataException("Expected 'fmt ' chunk");
+        
         DataHeader data = new DataHeader
         {
             ChunkId = reader.ReadUInt32(),
             ChunkSize = reader.ReadUInt32()
         };
+        
+        if (data.ChunkId != DATA)
+            throw new InvalidDataException("Expected 'data' chunk");
         
         int samplesCount = (int)(data.ChunkSize / 2);
 

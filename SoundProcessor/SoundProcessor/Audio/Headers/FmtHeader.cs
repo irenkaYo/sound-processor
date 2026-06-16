@@ -1,6 +1,6 @@
 namespace SoundProcessor.Audio.Headers;
 
-public class FmtHeader
+public struct FmtHeader
 {
     public uint ChunkId;
     public uint ChunkSize;
