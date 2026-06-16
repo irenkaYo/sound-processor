@@ -1,3 +1,4 @@
+using System.Globalization;
 using SoundProcessor.CommandLine;
 using SoundProcessor.Filters;
 using SoundProcessor.Filters.Effects;
@@ -77,7 +78,7 @@ public static class FilterProducers
 
         double factor = ParseDouble(descriptor.Parameters[0], nameof(factor));
         
-        if (factor < 0)
+        if (factor <= 0)
             throw new ArgumentException("Timestretch filter cannot be negative");
         
         return new TimestretchFilter(factor);
@@ -85,6 +86,9 @@ public static class FilterProducers
 
     public static IFilter GeneratorFilterCreator(FilterDescriptor descriptor)
     {
+        if (descriptor.Parameters.Count < 1)
+            throw new ArgumentException("Generator filter requires a type (sin, am, fm)");
+        
         string type = descriptor.Parameters[0];
         
         IFilter generator;
@@ -163,7 +167,7 @@ public static class FilterProducers
     
     private static double ParseDouble(string value, string name)
     {
-        if (!double.TryParse(value, out double result))
+        if (!double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double result))
             throw new ArgumentException($"{name} must be a number");
 
         return result;
