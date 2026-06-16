@@ -25,6 +25,8 @@ public class AMSinGenFilter : AbstractGeneratorFilter
         if (sound == null)
             return State.Error;
         
+        sound.Samples.Clear();
+        
         int duration = (int)Math.Round(DurationMs * sound.SampleRate / 1000);
 
         for (int i = 0; i < duration; i++)
