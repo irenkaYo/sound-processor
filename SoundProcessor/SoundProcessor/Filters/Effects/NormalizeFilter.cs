@@ -19,7 +19,7 @@ public class NormalizeFilter : IFilter
 
     public State Apply(Waveform? sound)
     {
-        if (sound == null)
+        if (sound == null || sound.Samples.Count == 0)
             return State.Error;
         
         int currentPeak = sound.Samples
