@@ -1,49 +1,42 @@
 SoundProcessor
 
-Консольное приложение для обработки аудиофайлов WAV. Принимает входной файл, пропускает его через цепочку фильтров и записывает результат.
+A console application for processing WAV audio files. It accepts an input file, runs it through a filter chain, and writes the result.
 
+The project is written in C# (.NET 9).
 
-Как запустить
+How to run
 
 SoundProcessor [-i input.wav] -o output.wav [-f filter params...]
 
+-i — input WAV file (optional if using a generator)
+-o — output file (required)
+-f — filter with parameters (can be specified multiple times)
 
--i — входной WAV-файл (необязательно, если используется генератор)
--o — выходной файл (обязательно)
--f — фильтр с параметрами (можно указывать несколько раз)
-
-
-Примеры:
+Examples:
 
 SoundProcessor -i input.wav -o output.wav -f ampl 0.8
 SoundProcessor -i input.wav -o output.wav -f lowpass 11 -f normalize
 SoundProcessor -o output.wav -f generator sin 440 3000
 
+Filters
 
-Фильтры
+Filter Parameters Description amplitude factor multiplies the amplitude by a factor (≥ 0) normalize[peak] normalizes the volume to the specified peak (0–1), defaults to 1 silenceunit start end inserts silence in a range (unit: ms or sec)timestretchfactor: Stretches or compresses audio over time (> 0); lowpasswindowSize: Low-pass filter — moving average (odd window size); generatorsinfreq_hz: duration_ms: Generates a sine wave of a specified frequency and duration; generatorsamplitudecarrier_hz: modulation_hz: depthduration_ms: AM synthesis (amplitude modulation); generatorsamplitudecarrier_hz: modulation_hz: deviation_hz: duration_ms: FM synthesis (frequency modulation)
 
-ФильтрПараметрыОписаниеamplfactorУмножает амплитуду на коэффициент (≥ 0)normalize[peak]Нормализует громкость до указанного пика (0–1), по умолчанию 1silenceunit start endВставляет тишину в диапазон (unit: ms или sec)timestretchfactorРастягивает или сжимает звук по времени (> 0)lowpasswindowSizeФильтр нижних частот — скользящее среднее (нечётный размер окна)generator sinfreq_hz duration_msГенерирует синусоиду заданной частоты и длительностиgenerator amamplitude carrier_hz modulation_hz depth duration_msAM-синтез (амплитудная модуляция)generator fmamplitude carrier_hz modulation_hz deviation_hz duration_msFM-синтез (частотная модуляция)
+Architecture
 
+The application is built using a component architecture:
 
-Архитектура
+ArgsParser: Parses command-line arguments
+CmdLineArgs2PipelineConverter: Converts parsed arguments into a filter chain
+Pipeline: Sequentially applies filters to an audio fragment
+WavReader / WavWriter: Read and write PCM WAV files (16-bit, mono)
+Waveform — the internal representation of sound (list of short samples + metadata)
+IFilter — the interface that each filter implements
 
-Приложение построено по компонентной архитектуре:
+Filters are divided into two types: effects (process an existing signal) and generators (replace a signal with a new one). You can add a new filter without changing the rest of the code—simply implement the IFilter and register it in Application.cs.
 
+Supported format: WAV
 
-ArgsParser — разбирает аргументы командной строки
-CmdLineArgs2PipelineConverter — преобразует распарсенные аргументы в цепочку фильтров
-Pipeline — последовательно применяет фильтры к звуковому фрагменту
-WavReader / WavWriter — читают и записывают PCM WAV-файлы (16-bit, mono)
-Waveform — внутреннее представление звука (список short-сэмплов + метаданные)
-IFilter — интерфейс, который реализует каждый фильтр
-
-
-Фильтры делятся на два типа: эффекты (обрабатывают существующий сигнал) и генераторы (заменяют сигнал новым). Добавить новый фильтр можно без изменения остального кода — достаточно реализовать IFilter и зарегистрировать его в Application.cs.
-
-
-Поддерживаемый формат WAV
-
-
-PCM (без сжатия)
+PCM (uncompressed)
 16-bit, mono
-Частота дискретизации: любая (по умолчанию 44100 Гц)
+Sampling rate: any (default: 44100 Hz)
